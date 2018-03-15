@@ -2,7 +2,7 @@
 // @name         R20-promode
 // @namespace    https://rem.uz/
 // @license      MIT (https://opensource.org/licenses/MIT)
-// @version      1.0.0
+// @version      1.1.0
 // @updateURL    https://get.5etools.com/R20-promode.js
 // @downloadURL  https://get.5etools.com/R20-promode.js
 // @description  Enhance your Roll20 experience
@@ -140,6 +140,7 @@ var D20plus = function (version) {
 	};
 
 	d20plus.enhanceMeasureTool = function () {
+		// ROLL20 CODE
 		var T = function(e, t, n, i, r, o) {
 			var a = d20.engine.getDistanceInScale({
 				x: t.x,
@@ -153,8 +154,10 @@ var D20plus = function (version) {
 			var l = s + "" + d20.Campaign.activePage().get("scale_units");
 			if (e.strokeStyle = t.color,
 					n) {
+				// BEGIN MOD
 				var fontSize = (1 / d20.engine.canvasZoom) * 12;
 				e.font = fontSize + "pt Arial Black";
+				// END MOD
 				var c = e.measureText(l);
 				e.fillStyle = "rgba(255,255,255,0.75)",
 					e.beginPath(),
@@ -198,6 +201,7 @@ var D20plus = function (version) {
 					}
 				})
 		}
+		// END ROLL20 CODE
 	};
 
 	d20plus.template_TokenEditor = `
