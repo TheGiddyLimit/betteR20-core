@@ -1,12 +1,12 @@
 // ==UserScript==
-// @name         R20-promode
+// @name         betteR20-core
 // @namespace    https://rem.uz/
 // @license      MIT (https://opensource.org/licenses/MIT)
 // @version      1.2.0
-// @updateURL    https://get.5etools.com/R20-promode.js
-// @downloadURL  https://get.5etools.com/R20-promode.js
+// @updateURL    https://get.5etools.com/betteR20-core.js
+// @downloadURL  https://get.5etools.com/betteR20-core.js
 // @description  Enhance your Roll20 experience
-// @author       TheGiddyLimit
+// @author       5etools
 // @match        https://app.roll20.net/editor/
 // @grant        unsafeWindow
 // @run-at       document-start
@@ -123,7 +123,7 @@ d20plus = {
 		});
 	},
 
-	enhanceMeasureTool: d20plus.enhanceMeasureTool = function () {
+	enhanceMeasureTool: function () {
 		// ROLL20 CODE
 		var T = function(e, t, n, i, r, o) {
 			var a = d20.engine.getDistanceInScale({
@@ -922,7 +922,7 @@ var D20plus = function (version) {
 
 	window.d20ext = {};
 	window.watch("d20ext", function (id, oldValue, newValue) {
-		d20plus.log("> Set Development");
+		d20plus.log("Set Development");
 		newValue.environment = "development";
 		Object.defineProperty(newValue, 'seenad', {
 			value: true
@@ -931,14 +931,14 @@ var D20plus = function (version) {
 	});
 	window.d20 = {};
 	window.watch("d20", function (id, oldValue, newValue) {
-		d20plus.log("> Obtained d20 variable");
+		d20plus.log("Obtained d20 variable");
 		window.unwatch("d20ext");
 		window.d20ext.environment = "production";
 		newValue.environment = "production";
 		return newValue;
 	});
 	window.d20plus = d20plus;
-	d20plus.log("> Injected");
+	d20plus.log("Injected");
 };
 
 // Inject
@@ -962,6 +962,6 @@ d20plus.Init = () => {
 	d20.textchat.incoming(false, ({
 		who: "system",
 		type: "system",
-		content: `<span style="font-weight: bold; font-family: 'Lucida Console', Monaco, monospace; color: #20C20E; background: black; padding: 3px;">R20-promode v${d20plus.version} ready</span>`
+		content: `<span style="font-weight: bold; font-family: 'Lucida Console', Monaco, monospace; color: #20C20E; background: black; padding: 3px;">betteR20-core v${d20plus.version} ready</span>`
 	}))
 };
