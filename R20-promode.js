@@ -2,7 +2,7 @@
 // @name         R20-promode
 // @namespace    https://rem.uz/
 // @license      MIT (https://opensource.org/licenses/MIT)
-// @version      1.1.0
+// @version      1.1.1
 // @updateURL    https://get.5etools.com/R20-promode.js
 // @downloadURL  https://get.5etools.com/R20-promode.js
 // @description  Enhance your Roll20 experience
@@ -51,9 +51,9 @@ var D20plus = function (version) {
 		if (window.is_gm) {
 			d20plus.log("> Add Pro features");
 			d20plus.addProFeatures();
-			d20plus.log("> Enhance Measure tool");
-			d20plus.enhanceMeasureTool();
 		}
+		d20plus.log("> Enhance Measure tool");
+		d20plus.enhanceMeasureTool();
 		d20plus.log("> All systems operational");
 
 		d20.textchat.incoming(false, ({
