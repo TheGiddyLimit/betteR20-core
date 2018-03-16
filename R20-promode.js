@@ -28,63 +28,31 @@ Object.defineProperty = function (obj, prop, vals) {
 	}
 };
 
-var D20plus = function (version) {
+d20plus = {
+	log: function (arg) {
+		console.log("%cD20Plus", "color: #3076b9; font-size: large", "> " + arg);
+	},
 
-	const d20plus = {
-		version: version
-	};
-
-	// Window loaded
-	window.onload = function () {
-		window.unwatch("d20");
-		const checkLoaded = setInterval(function () {
-			if (!$("#loading-overlay").is(":visible")) {
-				clearInterval(checkLoaded);
-				d20plus.Init();
-			}
-		}, 1000);
-	};
-
-	// Page fully loaded and visible
-	d20plus.Init = function () {
-		d20plus.log("> Init (v" + d20plus.version + ")");
-		d20plus.log("> Add CSS");
-		_.each(d20plus.cssRules, function (r) {
-			d20plus.addCSS(window.document.styleSheets[window.document.styleSheets.length - 1], r.s, r.r);
-		});
-		if (window.is_gm) {
-			d20plus.log("> Add Pro features");
-			d20plus.addProFeatures();
-		}
-		d20plus.log("> Enhance Measure tool");
-		d20plus.enhanceMeasureTool();
-		d20plus.log("> Enhance status effects");
-		d20plus.enhanceStatusEffects();
-		d20plus.log("> All systems operational");
-
-		d20.textchat.incoming(false, ({
-			who: "system",
-			type: "system",
-			content: `<span style="font-weight: bold; font-family: 'Lucida Console', Monaco, monospace; color: #20C20E; background: black; padding: 3px;">R20-promode v${d20plus.version} ready</span>`
-		}))
-	};
-
-	// Prettier log
-	d20plus.log = function (arg) {
-		console.log("%cD20Plus", "color: #3076b9; font-size: large", arg);
-	};
-
-	// Cross-browser add CSS rule
-	d20plus.addCSS = function(sheet, selector, rules) {
+	addCSS: (sheet, selector, rules) => {
 		const index = sheet.cssRules.length;
 		if ("insertRule" in sheet) {
 			sheet.insertRule(selector + "{" + rules + "}", index);
 		} else if ("addRule" in sheet) {
 			sheet.addRule(selector, rules, index);
 		}
-	};
+	},
 
-	d20plus.addProFeatures = function () {
+	addAllCss: () => {
+		const targetSheet = window.document.styleSheets[window.document.styleSheets.length - 1];
+		_.each(d20plus.baseCssRules, function (r) {
+			d20plus.addCSS(targetSheet, r.s, r.r);
+		});
+		_.each(d20plus.cssRules, function (r) {
+			d20plus.addCSS(targetSheet, r.s, r.r);
+		});
+	},
+
+	addProFeatures: function () {
 		function setMode(e) {
 			console.log(e),
 			"text" === e || "rect" === e || "polygon" === e || "path" === e || "pan" === e || "select" === e || "targeting" === e || "measure" === e || window.is_gm || (e = "select"),
@@ -153,9 +121,9 @@ var D20plus = function (version) {
 			var e = d20.Campaign.pages.get($(this).parents(".availablepage").attr("data-pageid"));
 			e.view._template = $.jqotec("#tmpl_pagesettings");
 		});
-	};
+	},
 
-	d20plus.enhanceMeasureTool = function () {
+	enhanceMeasureTool: d20plus.enhanceMeasureTool = function () {
 		// ROLL20 CODE
 		var T = function(e, t, n, i, r, o) {
 			var a = d20.engine.getDistanceInScale({
@@ -218,9 +186,9 @@ var D20plus = function (version) {
 				})
 		}
 		// END ROLL20 CODE
-	};
+	},
 
-	d20plus.enhanceStatusEffects = function () {
+	enhanceStatusEffects: function () {
 		d20.token_editor.statussheet.src = "https://raw.githubusercontent.com/TheGiddyLimit/5etoolsR20/master/img/statussheet.png";
 		d20.token_editor.statussheet_small.src = "https://raw.githubusercontent.com/TheGiddyLimit/5etoolsR20/master/img/statussheet_small.png";
 
@@ -417,7 +385,7 @@ var D20plus = function (version) {
 				$(document).on("keypress.statusnum", function(t) {
 					// BEGIN MOD // TODO see if this clashes with keyboard shortcuts
 					if ("dead" !== a && currentcontexttarget) {
-					// END MOD
+						// END MOD
 						var n = String.fromCharCode(t.which)
 							, i = "" == currentcontexttarget.model.get("statusmarkers") ? [] : currentcontexttarget.model.get("statusmarkers").split(",")
 							, r = (_.map(i, function(e) {
@@ -436,17 +404,21 @@ var D20plus = function (version) {
 					}
 				})
 		})
-	};
+	},
 
-	d20plus.cssRules = [
+	// CSS /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	baseCssRules: [
 		// status icon enhancement
 		{
 			s: "#radial-menu .markermenu .markericon",
-			r: "background-image: url(https://raw.githubusercontent.com/TheGiddyLimit/5etoolsR20/master/img/statussheet.png);"
+				r: "background-image: url(https://raw.githubusercontent.com/TheGiddyLimit/5etoolsR20/master/img/statussheet.png);"
 		}
-	];
+	],
 
-	d20plus.template_TokenEditor = `
+	cssRules: [], // other scripts should populate this
+
+	// HTML AND TEMPLATES //////////////////////////////////////////////////////////////////////////////////////////////
+	template_TokenEditor: `
 	 <script id='tmpl_tokeneditor' type='text/html'>
       <div class='dialog largedialog tokeneditor' style='display: block;'>
         <ul class='nav nav-tabs'>
@@ -752,9 +724,9 @@ var D20plus = function (version) {
         </div>
       </div>
 	</script>
-	`;
+`,
 
-	d20plus.template_pageSettings = `
+	template_pageSettings: `
 <script id="tmpl_pagesettings" type="text/html">
       <label style='padding-top: 4px;'>
         <strong>Page Size</strong>
@@ -889,7 +861,22 @@ var D20plus = function (version) {
       </button>
       <div class='clear'></div>
 </script>
-	`;
+`
+};
+
+var D20plus = function (version) {
+	d20plus.version = version;
+
+	// Window loaded
+	window.onload = function () {
+		window.unwatch("d20");
+		const checkLoaded = setInterval(function () {
+			if (!$("#loading-overlay").is(":visible")) {
+				clearInterval(checkLoaded);
+				d20plus.Init();
+			}
+		}, 1000);
+	};
 
 	/* object.watch polyfill by Eli Grey, http://eligrey.com */
 	if (!Object.prototype.watch) {
@@ -956,3 +943,25 @@ var D20plus = function (version) {
 
 // Inject
 if (window.top === window.self) unsafeWindow.eval("(" + D20plus.toString() + ")('" + GM_info.script.version + "')");
+
+// CUSTOM CODE =========================================================================================================
+d20plus.Init = () => {
+	d20plus.log("Init (v" + d20plus.version + ")");
+	d20plus.log("Add CSS");
+	d20plus.addAllCss();
+	if (window.is_gm) {
+		d20plus.log("Add Pro features");
+		d20plus.addProFeatures();
+	}
+	d20plus.log("Enhance Measure tool");
+	d20plus.enhanceMeasureTool();
+	d20plus.log("Enhance status effects");
+	d20plus.enhanceStatusEffects();
+	d20plus.log("All systems operational");
+
+	d20.textchat.incoming(false, ({
+		who: "system",
+		type: "system",
+		content: `<span style="font-weight: bold; font-family: 'Lucida Console', Monaco, monospace; color: #20C20E; background: black; padding: 3px;">R20-promode v${d20plus.version} ready</span>`
+	}))
+};
