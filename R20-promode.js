@@ -2,7 +2,7 @@
 // @name         R20-promode
 // @namespace    https://rem.uz/
 // @license      MIT (https://opensource.org/licenses/MIT)
-// @version      1.1.1
+// @version      1.2.0
 // @updateURL    https://get.5etools.com/R20-promode.js
 // @downloadURL  https://get.5etools.com/R20-promode.js
 // @description  Enhance your Roll20 experience
@@ -48,12 +48,18 @@ var D20plus = function (version) {
 	// Page fully loaded and visible
 	d20plus.Init = function () {
 		d20plus.log("> Init (v" + d20plus.version + ")");
+		d20plus.log("> Add CSS");
+		_.each(d20plus.cssRules, function (r) {
+			d20plus.addCSS(window.document.styleSheets[window.document.styleSheets.length - 1], r.s, r.r);
+		});
 		if (window.is_gm) {
 			d20plus.log("> Add Pro features");
 			d20plus.addProFeatures();
 		}
 		d20plus.log("> Enhance Measure tool");
 		d20plus.enhanceMeasureTool();
+		d20plus.log("> Enhance status effects");
+		d20plus.enhanceStatusEffects();
 		d20plus.log("> All systems operational");
 
 		d20.textchat.incoming(false, ({
@@ -66,6 +72,16 @@ var D20plus = function (version) {
 	// Prettier log
 	d20plus.log = function (arg) {
 		console.log("%cD20Plus", "color: #3076b9; font-size: large", arg);
+	};
+
+	// Cross-browser add CSS rule
+	d20plus.addCSS = function(sheet, selector, rules) {
+		const index = sheet.cssRules.length;
+		if ("insertRule" in sheet) {
+			sheet.insertRule(selector + "{" + rules + "}", index);
+		} else if ("addRule" in sheet) {
+			sheet.addRule(selector, rules, index);
+		}
 	};
 
 	d20plus.addProFeatures = function () {
@@ -203,6 +219,232 @@ var D20plus = function (version) {
 		}
 		// END ROLL20 CODE
 	};
+
+	d20plus.enhanceStatusEffects = function () {
+		d20.token_editor.statussheet.src = "https://raw.githubusercontent.com/TheGiddyLimit/5etoolsR20/master/img/statussheet.png";
+		d20.token_editor.statussheet_small.src = "https://raw.githubusercontent.com/TheGiddyLimit/5etoolsR20/master/img/statussheet_small.png";
+
+		const xSize = 34;
+		const iMin = 47;
+		const iMax = 101;
+		for (let i = iMin; i < iMax; ++i) {
+			d20.token_editor.statusmarkers["5etools_" + (i - iMin)] = String(i * xSize);
+		}
+
+		// TODO give this a proper button
+		$(`<button>BREAK STUFF</button>`).css({
+			position: "fixed",
+			top: "10px",
+			left: "10px",
+			"z-index": "10000"
+		}).on("click", () => {
+			d20.engine.canvas._objects.forEach(it => {
+				it.model.view.updateBackdrops = function (e) {
+					if (!this.nohud && ("objects" == this.model.get("layer") || "gmlayer" == this.model.get("layer")) && "image" == this.model.get("type") && this.model && this.model.collection && this.graphic) {
+						// BEGIN MOD
+						const scaleFact = d20.Campaign.activePage().get("snapping_increment");
+						// END MOD
+						var t = this.model.collection.page
+							, n = e || d20.engine.canvas.getContext();
+						n.save(),
+						(this.graphic.get("flipX") || this.graphic.get("flipY")) && n.scale(this.graphic.get("flipX") ? -1 : 1, this.graphic.get("flipY") ? -1 : 1);
+						var i = this
+							, r = Math.floor(this.graphic.get("width") / 2)
+							, o = Math.floor(this.graphic.get("height") / 2)
+							, a = (parseFloat(t.get("scale_number")),
+							this.model.get("statusmarkers").split(","));
+						-1 !== a.indexOf("dead") && (n.strokeStyle = "rgba(189,13,13,0.60)",
+							n.lineWidth = 10,
+							n.beginPath(),
+							n.moveTo(-r + 7, -o + 15),
+							n.lineTo(r - 7, o - 5),
+							n.moveTo(r - 7, -o + 15),
+							n.lineTo(-r + 7, o - 5),
+							n.closePath(),
+							n.stroke()),
+							n.rotate(-this.graphic.get("angle") * Math.PI / 180),
+							n.strokeStyle = "rgba(0,0,0,0.65)",
+							n.lineWidth = 1;
+						var s = 0
+							, l = i.model.get("bar1_value")
+							, c = i.model.get("bar1_max");
+						if ("" != c && (window.is_gm || this.model.get("showplayers_bar1") || this.model.currentPlayerControls() && this.model.get("playersedit_bar1"))) {
+							var u = parseInt(l, 10) / parseInt(c, 10)
+								, d = -o - 20 + 0;
+							n.fillStyle = "rgba(" + d20.Campaign.tokendisplay.bar1_rgb + ",0.75)",
+								n.beginPath(),
+								n.rect(-r + 3, d, Math.floor((2 * r - 6) * u), 8),
+								n.closePath(),
+								n.fill(),
+								n.beginPath(),
+								n.rect(-r + 3, d, 2 * r - 6, 8),
+								n.closePath(),
+								n.stroke(),
+								s++
+						}
+						var l = i.model.get("bar2_value")
+							, c = i.model.get("bar2_max");
+						if ("" != c && (window.is_gm || this.model.get("showplayers_bar2") || this.model.currentPlayerControls() && this.model.get("playersedit_bar2"))) {
+							var u = parseInt(l, 10) / parseInt(c, 10)
+								, d = -o - 20 + 12;
+							n.fillStyle = "rgba(" + d20.Campaign.tokendisplay.bar2_rgb + ",0.75)",
+								n.beginPath(),
+								n.rect(-r + 3, d, Math.floor((2 * r - 6) * u), 8),
+								n.closePath(),
+								n.fill(),
+								n.beginPath(),
+								n.rect(-r + 3, d, 2 * r - 6, 8),
+								n.closePath(),
+								n.stroke(),
+								s++
+						}
+						var l = i.model.get("bar3_value")
+							, c = i.model.get("bar3_max");
+						if ("" != c && (window.is_gm || this.model.get("showplayers_bar3") || this.model.currentPlayerControls() && this.model.get("playersedit_bar3"))) {
+							var u = parseInt(l, 10) / parseInt(c, 10)
+								, d = -o - 20 + 24;
+							n.fillStyle = "rgba(" + d20.Campaign.tokendisplay.bar3_rgb + ",0.75)",
+								n.beginPath(),
+								n.rect(-r + 3, d, Math.floor((2 * r - 6) * u), 8),
+								n.closePath(),
+								n.fill(),
+								n.beginPath(),
+								n.rect(-r + 3, d, 2 * r - 6, 8),
+								n.closePath(),
+								n.stroke()
+						}
+						var h, p, g = 1, f = !1;
+						switch (d20.Campaign.get("markers_position")) {
+							case "bottom":
+								h = o - 10,
+									p = r;
+								break;
+							case "left":
+								h = -o - 10,
+									p = -r,
+									f = !0;
+								break;
+							case "right":
+								h = -o - 10,
+									p = r - 18,
+									f = !0;
+								break;
+							default:
+								h = -o + 10,
+									p = r
+						}
+						// BEGIN MOD
+						n.strokeStyle = "white";
+						n.lineWidth = 3 * scaleFact;
+						const scaledFont = 14 * scaleFact;
+						n.font = "bold " + scaledFont + "px Arial";
+						// END MOD
+						_.each(a, function(e) {
+							var t = d20.token_editor.statusmarkers[e.split("@")[0]];
+							if (!t)
+								return !0;
+							if ("dead" === e)
+								return !0;
+							var i = 0;
+							if (g--,
+								"#" === t.substring(0, 1))
+								n.fillStyle = t,
+									n.beginPath(),
+									f ? h += 16 : p -= 16,
+									n.arc(p + 8, f ? h + 4 : h, 6, 0, 2 * Math.PI, !0),
+									n.closePath(),
+									n.stroke(),
+									n.fill(),
+									i = f ? 10 : 4;
+							else {
+								// BEGIN MOD
+								if (!d20.token_editor.statussheet_ready) return;
+								const scaledWH = 21 * scaleFact;
+								const scaledOffset = 22 * scaleFact;
+								f ? h += scaledOffset : p -= scaledOffset;
+
+								if (d20.engine.canvasZoom <= 1) {
+									n.drawImage(d20.token_editor.statussheet_small, parseInt(t, 10), 0, 21, 21, p, h - 9, scaledWH, scaledWH);
+								} else {
+									n.drawImage(d20.token_editor.statussheet, parseInt(t, 10), 0, 24, 24, p, h - 9, scaledWH, scaledWH)
+								}
+
+								i = f ? 14 : 12;
+								i *= scaleFact;
+								// END MOD
+							}
+							if (-1 !== e.indexOf("@")) {
+								var r = e.split("@")[1];
+								// BEGIN MOD
+								// TODO restore "0 to clear" functionality? or bind it to another key? backtick?
+								n.fillStyle = "rgb(222,31,31)";
+								var o = f ? 9 : 14;
+								o *= scaleFact;
+								o -= (14 - (scaleFact * 14));
+								n.strokeText(r + "", p + i, h + o);
+								n.fillText(r + "", p + i, h + o);
+								// END MOD
+							}
+						});
+						var m = i.model.get("name");
+						if ("" != m && 1 == this.model.get("showname") && (window.is_gm || this.model.get("showplayers_name") || this.model.currentPlayerControls() && this.model.get("playersedit_name"))) {
+							n.textAlign = "center";
+							// BEGIN MOD
+							var y = 14 * scaleFact;
+							const scaledY = 22 * scaleFact;
+							const scaled6 = 6 * scaleFact;
+							const scaled8 = 8 * scaleFact;
+							n.font = "bold " + y + "px Arial";
+							var v = n.measureText(m).width;
+							n.fillStyle = "rgba(255,255,255,0.50)";
+							n.fillRect(-1 * Math.floor((v + scaled6) / 2), o + scaled8, v + scaled6, y + scaled6);
+							n.fillStyle = "rgb(0,0,0)";
+							n.fillText(m + "", 0, o + scaledY, v);
+							// END MOD
+						}
+						n.restore()
+					}
+				}
+			});
+		}).appendTo(`body`);
+
+		$(document).off("mouseenter", ".markermenu");
+		$(document).on("mouseenter", ".markermenu", function() {
+			var e = this;
+			$(this).on("mouseover.statusiconhover", ".statusicon", function() {
+				a = $(this).attr("data-action-type").replace("toggle_status_", "")
+			}),
+				$(document).on("keypress.statusnum", function(t) {
+					// BEGIN MOD // TODO see if this clashes with keyboard shortcuts
+					if ("dead" !== a && currentcontexttarget) {
+					// END MOD
+						var n = String.fromCharCode(t.which)
+							, i = "" == currentcontexttarget.model.get("statusmarkers") ? [] : currentcontexttarget.model.get("statusmarkers").split(",")
+							, r = (_.map(i, function(e) {
+							return e.split("@")[0]
+						}),
+							!1);
+						i = _.map(i, function(e) {
+							return e.split("@")[0] == a ? (r = !0,
+							a + "@" + n) : e
+						}),
+						r || ($(e).find(".statusicon[data-action-type=toggle_status_" + a + "]").addClass("active"),
+							i.push(a + "@" + n)),
+							currentcontexttarget.model.save({
+								statusmarkers: i.join(",")
+							})
+					}
+				})
+		})
+	};
+
+	d20plus.cssRules = [
+		// status icon enhancement
+		{
+			s: "#radial-menu .markermenu .markericon",
+			r: "background-image: url(https://raw.githubusercontent.com/TheGiddyLimit/5etoolsR20/master/img/statussheet.png);"
+		}
+	];
 
 	d20plus.template_TokenEditor = `
 	 <script id='tmpl_tokeneditor' type='text/html'>
