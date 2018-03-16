@@ -2,7 +2,7 @@
 // @name         betteR20-core
 // @namespace    https://rem.uz/
 // @license      MIT (https://opensource.org/licenses/MIT)
-// @version      1.2.0
+// @version      1.2.1
 // @updateURL    https://get.5etools.com/betteR20-core.js
 // @downloadURL  https://get.5etools.com/betteR20-core.js
 // @description  Enhance your Roll20 experience
@@ -374,7 +374,7 @@ d20plus = {
 					}
 				}
 			});
-		}).appendTo(`body`);
+		 })//.appendTo(`body`);
 
 		$(document).off("mouseenter", ".markermenu");
 		$(document).on("mouseenter", ".markermenu", function() {
